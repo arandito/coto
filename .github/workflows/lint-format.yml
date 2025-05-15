@@ -1,0 +1,27 @@
+name: Lint and Format
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Run rustfmt (check formatting)
+        run: cargo fmt -- --check
+
+      - name: Run clippy (lint)
+        run: cargo clippy -- -D warnings
