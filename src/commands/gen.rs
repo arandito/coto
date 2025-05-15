@@ -1,7 +1,7 @@
 use crate::config::Config;
 use anyhow::{Context, Result};
 use reqwest::blocking::Client;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::{env, fs::File, io::Write};
 
 /// Handle the `coto gen` subcommand: invoke OpenAI and generate a boto3 snippet
