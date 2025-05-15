@@ -28,7 +28,7 @@ pub fn run() -> Result<()> {
             .clone()
             .unwrap_or_else(|| "default".into());
         let profile: String = Input::new()
-            .with_prompt("AWS profile name (as in ~/.aws/credentials)")
+            .with_prompt("AWS profile name (as in ~/.aws/credentials or ~/.aws/config)")
             .default(default_profile)
             .interact_text()?;
         cfg.default_profile = Some(profile);

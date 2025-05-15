@@ -18,17 +18,17 @@ struct Cli {
 enum Commands {
     /// Generate a boto3 snippet from natural language
     Gen {
-        #[arg(short, long)]
+        #[arg(short, long, help = "Generation prompt (required)")]
         prompt: Option<String>,
-        #[arg(short, long)]
+        #[arg(short, long, help = "AWS region (from config if unset)")]
         region: Option<String>,
-        #[arg(short = 'P', long)]
+        #[arg(short = 'P', long, help = "AWS profile (from config if unset)")]
         profile: Option<String>,
-        #[arg(short, long, default_value = "gpt-3.5-turbo")]
-        model: String,
-        #[arg(short, long)]
+        #[arg(short, long, help = "LLM model (from config if unset)")]
+        model: Option<String>,
+        #[arg(short, long, help = "Output file path (prints to stdout if unset)")]
         output: Option<String>,
-        #[arg(long)]
+        #[arg(short, long, help = "Dry run to verify OpenAI request before send")]
         dry_run: bool,
     },
 
@@ -40,14 +40,6 @@ enum Commands {
 
     /// Interactive first-time setup
     Setup,
-}
-
-#[derive(Subcommand)]
-enum ConfigAction {
-    /// Set a config key (openai_key, default_profile, default_region, model)
-    Set { key: String, value: String },
-    /// Show current config
-    Show,
 }
 
 fn main() -> anyhow::Result<()> {
