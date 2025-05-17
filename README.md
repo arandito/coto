@@ -47,7 +47,7 @@ Install `coto` with our standalone installers:
 curl -LsSf https://antoara.com/coto/install.sh | sh
 ```
 
-Windows standalone installer will be added in a future version. For now you can access our Windows binaries [here](https://github.com/arandito/coto/releases).
+Windows standalone installer will be added in a future version. You can access our Windows binaries [here](https://github.com/arandito/coto/releases).
 
 ## Configuration
 
