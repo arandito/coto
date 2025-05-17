@@ -1,15 +1,27 @@
 name: Release
-
 on:
   push:
     tags:
       - "v*.*.*"
 
 jobs:
-  build-and-publish:
+  create-release:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+  build-and-publish:
+    needs: create-release
     strategy:
       matrix:
         include:
@@ -17,55 +29,67 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             ext: tar.gz
+            bin: coto
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             ext: tar.gz
+            bin: coto
           # macOS
           - os: macos-latest
             target: x86_64-apple-darwin
             ext: tar.gz
+            bin: coto
           - os: macos-latest
             target: aarch64-apple-darwin
             ext: tar.gz
+            bin: coto
           # Windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             ext: zip
-
+            bin: coto.exe
+    runs-on: ${{ matrix.os }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
+      # for Linux only: install cross
+      - name: Install cross
+        if: matrix.os == 'ubuntu-latest'
+        run: cargo install cross --locked
+
+      # Install Rust toolchain with the correct target
+      - name: Setup Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
 
-      - name: Build release binary
+      - name: Build release binary (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: Build release binary (non-Linux)
+        if: matrix.os != 'ubuntu-latest'
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Package
+      - name: Package (Unix)
+        if: matrix.os != 'windows-latest'
         run: |
           mkdir -p dist
-          BIN="coto${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
           PACKAGE="coto-${{ matrix.target }}.${{ matrix.ext }}"
-          if [[ "${{ matrix.ext }}" == "zip" ]]; then
-            zip -j dist/$PACKAGE target/${{ matrix.target }}/release/$BIN
-          else
-            tar czf dist/$PACKAGE -C target/${{ matrix.target }}/release $BIN
-          fi
+          tar czf dist/$PACKAGE -C target/${{ matrix.target }}/release ${{ matrix.bin }}
 
-      - name: Create GitHub Release
-        if: matrix.os == 'ubuntu-latest'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: dist/*
+      - name: Package (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          mkdir -p dist
+          Compress-Archive -Path "target/${{ matrix.target }}/release/${{ matrix.bin }}" -DestinationPath "dist/coto-${{ matrix.target }}.${{ matrix.ext }}"
 
-      - name: Upload assets
-        if: matrix.os != 'ubuntu-latest
+      - name: Upload artifacts to release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
