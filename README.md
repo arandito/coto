@@ -143,7 +143,7 @@ coto gen -p "list all S3 buckets in us-west-2"
 coto gen -p "upload the file ~/profile.png to the coto-test S3 bucket" -o upload.py
 
 # Override defaults
-coto gen -p "delete the EC2 instance named coto-vm" --model gpt-4.1 --region us-east-1 --profile myprofile
+coto gen -p "delete the EC2 instance named coto-vm" --region us-east-1 --profile myprofile
 ```
 
 ## Contributing
