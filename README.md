@@ -44,7 +44,7 @@ Install `coto` with our standalone installers:
 
 ```bash
 # On macOS and Linux.
-curl -LsSf https://antoara.com/coto/install.sh | sh
+curl -LsSf https://aranda.xyz/coto/install.sh | sh
 ```
 
 Windows standalone installer will be added in a future version. You can access our Windows binaries [here](https://github.com/arandito/coto/releases).
